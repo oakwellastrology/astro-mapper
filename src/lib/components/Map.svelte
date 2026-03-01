@@ -76,7 +76,9 @@
 
 		const L = leafletModule;
 
-		map = L.map(container, { preferCanvas: true }).setView([37.44, -122.14], 6);
+		const { get } = await import('svelte/store');
+		const initialCenter = get(chartStore).centerLocation;
+		map = L.map(container, { preferCanvas: true }).setView([initialCenter.lat, initialCenter.lng], 6);
 
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; OpenStreetMap contributors',
@@ -85,9 +87,16 @@
 		let currentChart: ChartConfig;
 		let currentOpacity: number;
 		let currentThickness: number;
+		let lastCenter: { lat: number; lng: number } | null = null;
 
 		const unsubChart = chartStore.subscribe((chart) => {
 			currentChart = chart;
+			// Recenter map if center location changed
+			const c = chart.centerLocation;
+			if (lastCenter && (lastCenter.lat !== c.lat || lastCenter.lng !== c.lng)) {
+				map.setView([c.lat, c.lng]);
+			}
+			lastCenter = { lat: c.lat, lng: c.lng };
 			if (currentOpacity !== undefined) {
 				drawLines(currentChart, currentOpacity, currentThickness);
 			}

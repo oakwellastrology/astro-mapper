@@ -10,6 +10,13 @@ export interface ChartConfig {
 	createdAt: string;
 }
 
+export interface SavedLocation {
+	id: string;
+	lat: number;
+	lng: number;
+	label: string;
+}
+
 export interface PlanetLine {
 	id: string;
 	name: string;
