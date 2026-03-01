@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { chartStore, updatePlanetAzimuth, togglePlanetVisibility } from '$lib/stores/chartStore';
+	import {
+		chartStore,
+		updatePlanetAzimuth,
+		togglePlanetVisibility,
+		setCategoryVisibility,
+		setAllVisibility,
+		restoreVisibility,
+	} from '$lib/stores/chartStore';
 	import type { PlanetLine } from '$lib/types';
 
 	const CATEGORIES = [
@@ -10,6 +17,8 @@
 	] as const;
 
 	let collapsed: Record<string, boolean> = $state({});
+	let soloId: string | null = $state(null);
+	let preSoloSnapshot: Record<string, boolean> | null = $state(null);
 
 	function toggleGroup(key: string) {
 		collapsed[key] = !collapsed[key];
@@ -23,6 +32,38 @@
 		return groups;
 	}
 
+	function isGroupAllVisible(planets: PlanetLine[]) {
+		return planets.every((p) => p.visible);
+	}
+
+	function handleGroupToggle(category: string, planets: PlanetLine[]) {
+		const allVisible = isGroupAllVisible(planets);
+		setCategoryVisibility(category, !allVisible);
+	}
+
+	function handleSolo(planetId: string) {
+		if (soloId === planetId) {
+			// Unsolo: restore previous state
+			if (preSoloSnapshot) {
+				restoreVisibility(preSoloSnapshot);
+			}
+			soloId = null;
+			preSoloSnapshot = null;
+		} else {
+			// Solo: save current state, hide all except this one
+			if (!preSoloSnapshot) {
+				const snapshot: Record<string, boolean> = {};
+				for (const p of $chartStore.planets) {
+					snapshot[p.id] = p.visible;
+				}
+				preSoloSnapshot = snapshot;
+			}
+			setAllVisibility(false);
+			togglePlanetVisibility(planetId);
+			soloId = planetId;
+		}
+	}
+
 	function handleAzimuthInput(planetId: string, e: Event) {
 		const input = e.target as HTMLInputElement;
 		const value = input.value === '' ? null : parseFloat(input.value);
@@ -34,14 +75,32 @@
 <div class="space-y-1">
 	{#each CATEGORIES as cat}
 		{@const planets = groupPlanets($chartStore.planets)[cat.key]}
+		{@const allVisible = isGroupAllVisible(planets)}
 		<div>
-			<button
-				class="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm font-semibold uppercase tracking-wide text-gray-300 hover:bg-white/10"
-				onclick={() => toggleGroup(cat.key)}
-			>
-				{cat.label}
-				<span class="text-xs">{collapsed[cat.key] ? '▸' : '▾'}</span>
-			</button>
+			<div class="flex items-center gap-1 rounded px-2 py-1.5 hover:bg-white/10">
+				<button
+					class="flex grow items-center justify-between text-sm font-semibold uppercase tracking-wide text-gray-300"
+					onclick={() => toggleGroup(cat.key)}
+				>
+					{cat.label}
+					<span class="text-xs">{collapsed[cat.key] ? '▸' : '▾'}</span>
+				</button>
+				<label class="flex shrink-0 cursor-pointer items-center">
+					<input
+						type="checkbox"
+						checked={allVisible}
+						onchange={() => handleGroupToggle(cat.key, planets)}
+						class="sr-only"
+					/>
+					<span
+						class="h-4 w-8 rounded-full transition-colors {allVisible ? 'bg-blue-500' : 'bg-gray-600'}"
+					>
+						<span
+							class="mt-0.5 block h-3 w-3 rounded-full bg-white transition-transform {allVisible ? 'translate-x-4' : 'translate-x-0.5'}"
+						></span>
+					</span>
+				</label>
+			</div>
 
 			{#if !collapsed[cat.key]}
 				<div class="space-y-0.5">
@@ -66,7 +125,14 @@
 								class="h-3 w-3 shrink-0 rounded-full"
 								style="background-color: {planet.color}"
 							></span>
-							<label class="ml-auto flex cursor-pointer items-center">
+							<button
+								class="shrink-0 rounded px-1 text-xs transition-colors {soloId === planet.id ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:text-white'}"
+								onclick={() => handleSolo(planet.id)}
+								title="Solo"
+							>
+								S
+							</button>
+							<label class="flex shrink-0 cursor-pointer items-center">
 								<input
 									type="checkbox"
 									checked={planet.visible}

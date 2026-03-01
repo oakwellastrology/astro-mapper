@@ -46,6 +46,32 @@ export function togglePlanetVisibility(planetId: string) {
 	}));
 }
 
+export function setCategoryVisibility(category: string, visible: boolean) {
+	chartStore.update((chart) => ({
+		...chart,
+		planets: chart.planets.map((p) =>
+			p.category === category ? { ...p, visible } : p
+		),
+	}));
+}
+
+export function setAllVisibility(visible: boolean) {
+	chartStore.update((chart) => ({
+		...chart,
+		planets: chart.planets.map((p) => ({ ...p, visible })),
+	}));
+}
+
+export function restoreVisibility(snapshot: Record<string, boolean>) {
+	chartStore.update((chart) => ({
+		...chart,
+		planets: chart.planets.map((p) => ({
+			...p,
+			visible: snapshot[p.id] ?? p.visible,
+		})),
+	}));
+}
+
 export function setCenter(lat: number, lng: number, label: string) {
 	chartStore.update((chart) => ({
 		...chart,

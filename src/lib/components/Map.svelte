@@ -1,30 +1,35 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { chartStore } from '$lib/stores/chartStore';
+	import { settingsStore } from '$lib/stores/settingsStore';
 	import { geodesicPoints } from '$lib/utils/geo';
 	import type { PlanetLine } from '$lib/types';
+	import type { ChartConfig } from '$lib/types';
 
 	let container: HTMLDivElement;
 	let leafletModule: typeof import('leaflet');
 	let map: L.Map;
 	let polylines: L.Polyline[] = [];
 
-	const LINE_STYLES: Record<
-		PlanetLine['category'],
-		{ weight: number; dashArray: string | undefined }
-	> = {
-		personal: { weight: 3, dashArray: undefined },
-		social: { weight: 2.5, dashArray: undefined },
-		transpersonal: { weight: 2, dashArray: '8, 6' },
-		point: { weight: 1.5, dashArray: '4, 4' },
+	const BASE_WEIGHTS: Record<PlanetLine['category'], number> = {
+		personal: 3,
+		social: 2.5,
+		transpersonal: 2,
+		point: 1.5,
 	};
 
-	function drawLines(chart: typeof $chartStore) {
+	const DASH_ARRAYS: Record<PlanetLine['category'], string | undefined> = {
+		personal: undefined,
+		social: undefined,
+		transpersonal: '8, 6',
+		point: '4, 4',
+	};
+
+	function drawLines(chart: ChartConfig, opacity: number, thicknessMultiplier: number) {
 		if (!map || !leafletModule) return;
 
 		const L = leafletModule;
 
-		// Clear existing polylines
 		for (const pl of polylines) {
 			pl.remove();
 		}
@@ -35,21 +40,20 @@
 		for (const planet of chart.planets) {
 			if (planet.azimuth === null || !planet.visible) continue;
 
-			const style = LINE_STYLES[planet.category];
+			const baseWeight = BASE_WEIGHTS[planet.category] * thicknessMultiplier;
+			const dashArray = DASH_ARRAYS[planet.category];
+
 			const forward = geodesicPoints(center, planet.azimuth, 20_000_000, 100);
 			const backward = geodesicPoints(center, (planet.azimuth + 180) % 360, 20_000_000, 100);
 			const fullPath = [...backward.reverse(), ...forward];
-
-			const baseWeight = style.weight;
-			const baseOpacity = 0.7;
 
 			const line = L.polyline(
 				fullPath.map((p) => [p.lat, p.lng] as L.LatLngTuple),
 				{
 					color: planet.color,
 					weight: baseWeight,
-					dashArray: style.dashArray,
-					opacity: baseOpacity,
+					dashArray,
+					opacity,
 				}
 			).addTo(map);
 
@@ -59,7 +63,7 @@
 				line.setStyle({ opacity: 1.0, weight: baseWeight + 1 });
 			});
 			line.on('mouseout', () => {
-				line.setStyle({ opacity: baseOpacity, weight: baseWeight });
+				line.setStyle({ opacity, weight: baseWeight });
 			});
 
 			polylines.push(line);
@@ -78,13 +82,28 @@
 			attribution: '&copy; OpenStreetMap contributors',
 		}).addTo(map);
 
-		// Draw initial lines and subscribe to changes
-		const unsubscribe = chartStore.subscribe((chart) => {
-			drawLines(chart);
+		let currentChart: ChartConfig;
+		let currentOpacity: number;
+		let currentThickness: number;
+
+		const unsubChart = chartStore.subscribe((chart) => {
+			currentChart = chart;
+			if (currentOpacity !== undefined) {
+				drawLines(currentChart, currentOpacity, currentThickness);
+			}
+		});
+
+		const unsubSettings = settingsStore.subscribe((settings) => {
+			currentOpacity = settings.opacity;
+			currentThickness = settings.thicknessMultiplier;
+			if (currentChart) {
+				drawLines(currentChart, currentOpacity, currentThickness);
+			}
 		});
 
 		return () => {
-			unsubscribe();
+			unsubChart();
+			unsubSettings();
 			map.remove();
 		};
 	});
