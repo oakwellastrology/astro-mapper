@@ -61,5 +61,19 @@ export function calculateAzimuths(
 		results[name] = (xaz[0] + 180) % 360;
 	}
 
+	// Sanity check: ASC azimuth should be near 90° (East) or 270° (West).
+	// If it's near 0° or 180°, the South-to-North conversion is likely wrong.
+	if (results['asc'] !== undefined) {
+		const asc = results['asc'];
+		const nearEast = Math.abs(asc - 90) < 30;
+		const nearWest = Math.abs(asc - 270) < 30;
+		if (!nearEast && !nearWest) {
+			console.warn(
+				`[Azimuth] ASC azimuth is ${asc.toFixed(1)}°, expected near 90° or 270°. ` +
+					`South-to-North conversion may be incorrect.`
+			);
+		}
+	}
+
 	return results;
 }

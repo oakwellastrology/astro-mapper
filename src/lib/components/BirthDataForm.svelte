@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { birthDataStore, setBirthData } from '$lib/stores/birthDataStore';
-	import { chartStore, updatePlanetAzimuth, setCenter } from '$lib/stores/chartStore';
+	import { chartStore, updatePlanetAzimuth, setCenter, setAutoAzimuths } from '$lib/stores/chartStore';
 	import { searchLocation, type GeocoderResult } from '$lib/utils/geocoder';
 	import { getTimezoneFromCoords, getUtcOffset } from '$lib/astro/timezone';
 	import { getEphemeris } from '$lib/astro/ephemeris';
@@ -127,6 +127,9 @@
 				const az = azimuths[planet.id];
 				updatePlanetAzimuth(planet.id, az !== undefined ? az : null);
 			}
+
+			// Store auto-calculated values for override detection
+			setAutoAzimuths(azimuths);
 
 			// Re-center the map to the birth location
 			setCenter(latitude, longitude, locationLabel);

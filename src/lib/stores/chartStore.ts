@@ -72,6 +72,16 @@ export function restoreVisibility(snapshot: Record<string, boolean>) {
 	}));
 }
 
+/**
+ * Stores the last auto-calculated azimuth values (from calculateAzimuths).
+ * Used to detect when a user has manually overridden an auto-calculated value.
+ */
+export const autoAzimuthsStore = writable<Record<string, number>>({});
+
+export function setAutoAzimuths(azimuths: Record<string, number>) {
+	autoAzimuthsStore.set(azimuths);
+}
+
 export function setCenter(lat: number, lng: number, label: string) {
 	chartStore.update((chart) => ({
 		...chart,

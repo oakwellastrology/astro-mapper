@@ -6,8 +6,15 @@
 		setCategoryVisibility,
 		setAllVisibility,
 		restoreVisibility,
+		autoAzimuthsStore,
 	} from '$lib/stores/chartStore';
 	import type { PlanetLine } from '$lib/types';
+
+	function isManualOverride(planet: PlanetLine): boolean {
+		const auto = $autoAzimuthsStore[planet.id];
+		if (auto === undefined || planet.azimuth === null) return false;
+		return Math.abs(planet.azimuth - auto) > 0.05;
+	}
 
 	const CATEGORIES = [
 		{ key: 'personal', label: 'Personal' },
@@ -121,6 +128,12 @@
 								class="w-16 rounded bg-white/10 px-1.5 py-0.5 text-right text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 							/>
 							<span class="text-xs text-gray-400">°</span>
+							{#if isManualOverride(planet)}
+								<span
+									class="h-2 w-2 shrink-0 rounded-full bg-yellow-400"
+									title="Manually edited (auto: {$autoAzimuthsStore[planet.id]?.toFixed(1)}°)"
+								></span>
+							{/if}
 							<span
 								class="h-3 w-3 shrink-0 rounded-full"
 								style="background-color: {planet.color}"
