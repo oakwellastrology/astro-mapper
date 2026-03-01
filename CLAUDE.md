@@ -50,3 +50,12 @@ Single-page app: `src/routes/+page.svelte` renders a two-column layout (sidebar 
 ## Line Styling
 
 Lines are styled by planet category. See SPEC.md for the full table, but the key distinction: `personal`/`social` planets use solid lines, `transpersonal`/`point` use dashed (`dashArray`). Hover increases opacity to 1.0 and weight by 1, showing a tooltip with symbol, name, and azimuth.
+
+## ACG + Auto-Azimuth Extension
+
+- See ACG_FEATURE_SPEC.md for full spec.
+- Depends on sweph-wasm (Swiss Ephemeris compiled to WASM). Must be dynamically imported in onMount — crashes during SSR.
+- New files go in src/lib/astro/ (ephemeris.ts, azimuth.ts, acg.ts, timezone.ts).
+- CRITICAL: swe_azalt() returns azimuth from SOUTH clockwise. Convert to North-clockwise: (az + 180) % 360.
+- ACG lines are a separate Leaflet layer group from Local Space lines. User toggles between them.
+- License: AGPL-3.0 (required by Swiss Ephemeris). Add LICENSE file.
