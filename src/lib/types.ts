@@ -17,6 +17,19 @@ export interface SavedLocation {
 	label: string;
 }
 
+export interface BirthData {
+	year: number;
+	month: number; // 1-12
+	day: number; // 1-31
+	hour: number; // 0-23
+	minute: number; // 0-59
+	latitude: number;
+	longitude: number;
+	locationLabel: string;
+	timezoneOffset: number; // hours from UTC (e.g. -5 for EST)
+	timezoneId: string; // IANA timezone ID, e.g. "America/New_York"
+}
+
 export interface PlanetLine {
 	id: string;
 	name: string;

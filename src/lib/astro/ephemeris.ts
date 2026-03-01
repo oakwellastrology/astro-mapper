@@ -13,6 +13,7 @@ export async function initEphemeris(): Promise<SwissEphInstance> {
 
 	const { default: SwissEPH } = await import('sweph-wasm');
 	swe = await SwissEPH.init();
+	await swe.swe_set_ephe_path();
 	return swe;
 }
 
