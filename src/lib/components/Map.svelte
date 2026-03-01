@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { chartStore } from '$lib/stores/chartStore';
+	import { chartStore, setCenter } from '$lib/stores/chartStore';
 	import { settingsStore } from '$lib/stores/settingsStore';
 	import { geodesicPoints } from '$lib/utils/geo';
 	import type { PlanetLine } from '$lib/types';
@@ -10,6 +10,7 @@
 	let leafletModule: typeof import('leaflet');
 	let map: L.Map;
 	let polylines: L.Polyline[] = [];
+	let centerMarker: L.Marker;
 
 	const BASE_WEIGHTS: Record<PlanetLine['category'], number> = {
 		personal: 3,
@@ -37,6 +38,19 @@
 
 		const center = chart.centerLocation;
 
+		// Update or create the draggable center marker
+		if (centerMarker) {
+			centerMarker.setLatLng([center.lat, center.lng]);
+		} else {
+			centerMarker = L.marker([center.lat, center.lng], { draggable: true })
+				.addTo(map)
+				.bindTooltip('Drag to relocate center');
+			centerMarker.on('dragend', () => {
+				const pos = centerMarker.getLatLng();
+				setCenter(pos.lat, pos.lng, `${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`);
+			});
+		}
+
 		for (const planet of chart.planets) {
 			if (planet.azimuth === null || !planet.visible) continue;
 
@@ -57,7 +71,7 @@
 				}
 			).addTo(map);
 
-			line.bindTooltip(`${planet.symbol} ${planet.name} — ${planet.azimuth}°`);
+			line.bindTooltip(`${planet.symbol} ${planet.name} — ${planet.azimuth}°`, { sticky: true });
 
 			line.on('mouseover', () => {
 				line.setStyle({ opacity: 1.0, weight: baseWeight + 1 });
