@@ -11,6 +11,9 @@ importers:
       leaflet:
         specifier: ^1.9.0
         version: 1.9.4
+      sweph-wasm:
+        specifier: ^2.6.9
+        version: 2.6.9
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.0
@@ -610,6 +613,10 @@ packages:
       picomatch:
         optional: true
 
+  fixed-len-array@1.12.0:
+    resolution: {integrity: sha512-iJp5kICdoD3zOKlIv8jBNq1Zx/k7G08Iac5u9P4oYH99uw9pKge5Sm5hWLwUmhxjsYV67M4Vr3aJAjLoPLiR9A==}
+    engines: {node: '>=22'}
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -783,6 +790,10 @@ packages:
     resolution: {integrity: sha512-lP5DGF3oDDI9fhHcSpaBiJEkFLuS16h92DhM1L5K1lFm0WjOmUh1i2sNkBBk8rkxJRpob0dBE75jRfUzGZUOGA==}
     engines: {node: '>=18'}
 
+  sweph-wasm@2.6.9:
+    resolution: {integrity: sha512-SNM+XiujTAlgyU07M7onZWYNk/XsFmaWWm9QphMRkaNzXVMx9sRLBzxs7ubO9kBbXEPgJSm2SP/xyzOZ8Vp1mA==}
+    engines: {node: '>=22'}
+
   tailwindcss@4.2.1:
     resolution: {integrity: sha512-/tBrSQ36vCleJkAOsy9kbNTgaxvGbyOamC30PRePTQe/o1MFwEKHQk4Cn7BNGaPtjp+PuUrByJehM1hgxfq4sw==}
 
@@ -895,6 +906,10 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  wasp-lib@1.12.9:
+    resolution: {integrity: sha512-mRK13hr5CBXrtHoVfLoKNnB/HxYABYSRv0w5T9Ca8wAnwbZnbd1vAiwLPi9VkgJwnLgnB0416sHI8kyayZPpNQ==}
+    engines: {node: '>=22'}
 
   why-is-node-running@2.3.0:
     resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
@@ -1329,6 +1344,8 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.3
 
+  fixed-len-array@1.12.0: {}
+
   fsevents@2.3.3:
     optional: true
 
@@ -1503,6 +1520,11 @@ snapshots:
       magic-string: 0.30.21
       zimmerframe: 1.1.4
 
+  sweph-wasm@2.6.9:
+    dependencies:
+      fixed-len-array: 1.12.0
+      wasp-lib: 1.12.9
+
   tailwindcss@4.2.1: {}
 
   tapable@2.3.0: {}
@@ -1573,6 +1595,10 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  wasp-lib@1.12.9:
+    dependencies:
+      fixed-len-array: 1.12.0
 
   why-is-node-running@2.3.0:
     dependencies:

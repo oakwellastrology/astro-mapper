@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Map from '$lib/components/Map.svelte';
 	import AzimuthForm from '$lib/components/AzimuthForm.svelte';
 	import CompassPreview from '$lib/components/CompassPreview.svelte';
@@ -6,6 +7,26 @@
 	import { settingsStore } from '$lib/stores/settingsStore';
 
 	let activeTab: 'azimuths' | 'location' | 'settings' = $state('azimuths');
+
+	onMount(async () => {
+		const { initEphemeris } = await import('$lib/astro/ephemeris');
+		const swe = await initEphemeris();
+
+		// Smoke test 1: swe_julday — J2000 epoch should be ~2451545.0
+		const jd = swe.swe_julday(2000, 1, 1, 12, 1);
+		console.log('[Ephemeris] swe_julday(2000-01-01 12:00 UT) =', jd, '(expected ~2451545.0)');
+
+		// Smoke test 2: swe_calc_ut — Sun longitude at J2000 should be ~280°
+		const sunPos = swe.swe_calc_ut(jd, 0, 0);
+		console.log('[Ephemeris] Sun ecliptic longitude at J2000 =', sunPos[0].toFixed(2) + '°', '(expected ~280°)');
+
+		// Smoke test 3: swe_azalt — horizontal coords for Sun from Greenwich
+		const geopos: [number, number, number] = [0, 51.5, 0]; // lon, lat, elev (Greenwich)
+		const xin: [number, number, number] = [sunPos[0], sunPos[1], sunPos[2]];
+		const xaz = swe.swe_azalt(jd, 0, geopos, 0, 0, xin);
+		console.log('[Ephemeris] Sun azimuth (from South) =', xaz[0].toFixed(2) + '°, altitude =', xaz[1].toFixed(2) + '°');
+		console.log('[Ephemeris] Sun azimuth (from North) =', ((xaz[0] + 180) % 360).toFixed(2) + '°');
+	});
 </script>
 
 <div class="flex h-screen w-screen">
