@@ -12,13 +12,14 @@ export const DEFAULT_PLANETS: Omit<PlanetLine, 'azimuth'>[] = [
 	{ id: 'neptune', name: 'Neptune', symbol: '♆', color: '#6644FF', lineStyle: 'dashed', visible: true, category: 'transpersonal' },
 	{ id: 'pluto', name: 'Pluto', symbol: '♇', color: '#44AA44', lineStyle: 'dashed', visible: true, category: 'transpersonal' },
 	{ id: 'nnode', name: 'N. Node', symbol: '☊', color: '#666666', lineStyle: 'dashed', visible: true, category: 'point' },
+	{ id: 'vesta', name: 'Vesta', symbol: '⚶', color: '#666666', lineStyle: 'dashed', visible: true, category: 'point' },
 	{ id: 'chiron', name: 'Chiron', symbol: '⚷', color: '#666666', lineStyle: 'dashed', visible: true, category: 'point' },
 ];
 
 const SAMPLE_AZIMUTHS: Record<string, number> = {
 	sun: 211, moon: 195, mercury: 215, venus: 239, mars: 200,
 	jupiter: 68, saturn: 301, uranus: 307, neptune: 318, pluto: 266,
-	nnode: 136, chiron: 157,
+	nnode: 136, vesta: 200, chiron: 157,
 };
 
 export const SAMPLE_CHART: ChartConfig = {

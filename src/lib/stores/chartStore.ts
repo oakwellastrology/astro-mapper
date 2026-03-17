@@ -12,8 +12,12 @@ function loadChart(): ChartConfig {
 	if (saved) {
 		try {
 			const chart = JSON.parse(saved) as ChartConfig;
-			// Filter out removed planets (e.g. asc, mc) from cached data
-			chart.planets = chart.planets.filter((p) => VALID_IDS.has(p.id));
+			// Merge cached data with DEFAULT_PLANETS: preserve cached values, add new planets, remove old ones, maintain DEFAULT_PLANETS order
+			const cachedById = new Map(chart.planets.map((p) => [p.id, p]));
+			chart.planets = DEFAULT_PLANETS.map((def) => {
+				const cached = cachedById.get(def.id);
+				return cached ?? { ...def, azimuth: null };
+			});
 			return chart;
 		} catch {
 			return SAMPLE_CHART;

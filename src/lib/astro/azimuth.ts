@@ -16,6 +16,7 @@ const PLANET_MAP: [string, number][] = [
 	['neptune', 8],
 	['pluto', 9],
 	['nnode', 11], // True Node
+	['vesta', 20],
 	['chiron', 15],
 ];
 
