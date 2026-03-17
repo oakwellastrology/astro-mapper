@@ -3,7 +3,6 @@ import type { BirthData } from '../types';
 
 /**
  * Maps planet IDs used in the app to Swiss Ephemeris planet numbers.
- * 'asc' and 'mc' are handled separately via swe_houses.
  */
 const PLANET_MAP: [string, number][] = [
 	['sun', 0],
@@ -45,34 +44,6 @@ export function calculateAzimuths(
 		const xaz = swe.swe_azalt(jd, 0, geopos, 0, 0, xin);
 		// xaz[0] = azimuth from South clockwise → convert to North clockwise
 		results[name] = (xaz[0] + 180) % 360;
-	}
-
-	// ASC and MC from house calculation (Placidus)
-	const houses = swe.swe_houses(jd, birth.latitude, birth.longitude, 'P');
-	// houses.ascmc[0] = Ascendant ecliptic longitude
-	// houses.ascmc[1] = MC ecliptic longitude
-
-	for (const [name, eclLon] of [
-		['asc', houses.ascmc[0]],
-		['mc', houses.ascmc[1]],
-	] as const) {
-		const xin: [number, number, number] = [eclLon, 0, 1]; // latitude 0 for ecliptic points
-		const xaz = swe.swe_azalt(jd, 0, geopos, 0, 0, xin);
-		results[name] = (xaz[0] + 180) % 360;
-	}
-
-	// Sanity check: ASC azimuth should be near 90° (East) or 270° (West).
-	// If it's near 0° or 180°, the South-to-North conversion is likely wrong.
-	if (results['asc'] !== undefined) {
-		const asc = results['asc'];
-		const nearEast = Math.abs(asc - 90) < 30;
-		const nearWest = Math.abs(asc - 270) < 30;
-		if (!nearEast && !nearWest) {
-			console.warn(
-				`[Azimuth] ASC azimuth is ${asc.toFixed(1)}°, expected near 90° or 270°. ` +
-					`South-to-North conversion may be incorrect.`
-			);
-		}
 	}
 
 	return results;

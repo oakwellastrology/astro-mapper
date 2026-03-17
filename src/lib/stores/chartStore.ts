@@ -1,15 +1,20 @@
 import { writable } from 'svelte/store';
 import type { ChartConfig } from '../types';
-import { SAMPLE_CHART } from '../constants';
+import { DEFAULT_PLANETS, SAMPLE_CHART } from '../constants';
 
 const STORAGE_KEY = 'localspace-chart';
+
+const VALID_IDS = new Set(DEFAULT_PLANETS.map((p) => p.id));
 
 function loadChart(): ChartConfig {
 	if (typeof localStorage === 'undefined') return SAMPLE_CHART;
 	const saved = localStorage.getItem(STORAGE_KEY);
 	if (saved) {
 		try {
-			return JSON.parse(saved) as ChartConfig;
+			const chart = JSON.parse(saved) as ChartConfig;
+			// Filter out removed planets (e.g. asc, mc) from cached data
+			chart.planets = chart.planets.filter((p) => VALID_IDS.has(p.id));
+			return chart;
 		} catch {
 			return SAMPLE_CHART;
 		}
