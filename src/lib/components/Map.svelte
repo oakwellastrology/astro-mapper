@@ -106,6 +106,21 @@
 
 		const L = leafletModule;
 
+		// Fix default marker icon paths broken by bundlers
+		const iconUrl = (await import('leaflet/dist/images/marker-icon.png')).default;
+		const iconRetinaUrl = (await import('leaflet/dist/images/marker-icon-2x.png')).default;
+		const shadowUrl = (await import('leaflet/dist/images/marker-shadow.png')).default;
+		L.Marker.prototype.options.icon = L.icon({
+			iconUrl,
+			iconRetinaUrl,
+			shadowUrl,
+			iconSize: [25, 41],
+			iconAnchor: [12, 41],
+			popupAnchor: [1, -34],
+			tooltipAnchor: [16, -28],
+			shadowSize: [41, 41],
+		});
+
 		const { get } = await import('svelte/store');
 		const initialChart = get(chartStore);
 		const initialHasLocation = hasLocation(initialChart);
