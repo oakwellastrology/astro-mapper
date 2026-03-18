@@ -6,6 +6,12 @@
 	import { getEphemeris } from '$lib/astro/ephemeris';
 	import { calculateAzimuths } from '$lib/astro/azimuth';
 
+	interface Props {
+		onCalculated?: () => void;
+	}
+
+	let { onCalculated }: Props = $props();
+
 	// Form fields — use NaN for "empty" so inputs show placeholders
 	let year = $state($birthDataStore?.year ?? NaN);
 	let month = $state($birthDataStore?.month ?? NaN);
@@ -141,6 +147,8 @@
 
 			// Persist birth data
 			setBirthData(data);
+
+			onCalculated?.();
 		} catch (err) {
 			calcError = err instanceof Error ? err.message : 'Calculation failed';
 			console.error('Azimuth calculation error:', err);
@@ -169,7 +177,7 @@
 					min="1900"
 					max="2100"
 					bind:value={year}
-					placeholder="1990"
+					placeholder="1960"
 					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				/>
 			</label>

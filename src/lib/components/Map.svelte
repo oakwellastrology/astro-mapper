@@ -167,7 +167,14 @@
 			}
 		});
 
+		// Invalidate map size when container resizes (e.g. mobile layout change)
+		const resizeObserver = new ResizeObserver(() => {
+			map.invalidateSize();
+		});
+		resizeObserver.observe(container);
+
 		return () => {
+			resizeObserver.disconnect();
 			unsubChart();
 			unsubSettings();
 			map.remove();

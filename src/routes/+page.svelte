@@ -8,6 +8,16 @@
 	import { settingsStore } from '$lib/stores/settingsStore';
 
 	let activeTab: 'birthdata' | 'azimuths' | 'location' | 'settings' = $state('birthdata');
+	let mapSection: HTMLElement;
+	let controlsSection: HTMLElement;
+
+	function scrollToMap() {
+		mapSection?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	function scrollToControls() {
+		controlsSection?.scrollIntoView({ behavior: 'smooth' });
+	}
 
 	onMount(async () => {
 		const { initEphemeris } = await import('$lib/astro/ephemeris');
@@ -15,8 +25,8 @@
 	});
 </script>
 
-<div class="flex h-screen w-screen">
-	<aside class="flex w-96 shrink-0 flex-col overflow-y-auto bg-[#1a1a2e] text-white">
+<div class="flex h-screen w-screen flex-col lg:flex-row">
+	<aside bind:this={controlsSection} class="flex w-full shrink-0 flex-col bg-[#1a1a2e] text-white lg:h-screen lg:w-96 lg:overflow-y-auto">
 		<h1 class="px-4 pt-4 text-lg font-semibold">Local Space Map</h1>
 
 		<!-- Tabs -->
@@ -34,9 +44,9 @@
 		</div>
 
 		<!-- Tab content -->
-		<div class="flex-1 overflow-y-auto p-4">
+		<div class="p-4 lg:flex-1 lg:overflow-y-auto">
 			{#if activeTab === 'birthdata'}
-				<BirthDataForm />
+				<BirthDataForm onCalculated={scrollToMap} />
 			{:else if activeTab === 'azimuths'}
 				<CompassPreview />
 				<div class="mt-4">
@@ -85,7 +95,13 @@
 		</div>
 		<p class="px-4 py-3 text-lg text-gray-500">&copy; Sam Oakwell 2026</p>
 	</aside>
-	<main class="grow">
+	<main bind:this={mapSection} class="relative h-[100svh] w-full shrink-0 lg:h-auto lg:grow">
+		<button
+			onclick={scrollToControls}
+			class="absolute left-1/2 top-3 z-[1000] -translate-x-1/2 rounded-full bg-[#1a1a2e]/90 px-4 py-1.5 text-lg text-white shadow-lg backdrop-blur transition-colors hover:bg-[#1a1a2e] cursor-pointer lg:hidden"
+		>
+			&uarr; Controls
+		</button>
 		<Map />
 	</main>
 </div>
