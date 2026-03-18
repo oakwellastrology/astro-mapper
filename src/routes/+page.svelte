@@ -16,7 +16,7 @@
 </script>
 
 <div class="flex h-screen w-screen">
-	<aside class="flex w-80 shrink-0 flex-col overflow-y-auto bg-[#1a1a2e] text-white">
+	<aside class="flex w-96 shrink-0 flex-col overflow-y-auto bg-[#1a1a2e] text-white">
 		<h1 class="px-4 pt-4 text-lg font-semibold">Local Space Map</h1>
 
 		<!-- Tabs -->

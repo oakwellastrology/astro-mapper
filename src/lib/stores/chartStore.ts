@@ -1,15 +1,24 @@
 import { writable } from 'svelte/store';
 import type { ChartConfig } from '../types';
-import { SAMPLE_CHART } from '../constants';
+import { DEFAULT_PLANETS, SAMPLE_CHART } from '../constants';
 
 const STORAGE_KEY = 'localspace-chart';
+
+const VALID_IDS = new Set(DEFAULT_PLANETS.map((p) => p.id));
 
 function loadChart(): ChartConfig {
 	if (typeof localStorage === 'undefined') return SAMPLE_CHART;
 	const saved = localStorage.getItem(STORAGE_KEY);
 	if (saved) {
 		try {
-			return JSON.parse(saved) as ChartConfig;
+			const chart = JSON.parse(saved) as ChartConfig;
+			// Merge cached data with DEFAULT_PLANETS: preserve cached values, add new planets, remove old ones, maintain DEFAULT_PLANETS order
+			const cachedById = new Map(chart.planets.map((p) => [p.id, p]));
+			chart.planets = DEFAULT_PLANETS.map((def) => {
+				const cached = cachedById.get(def.id);
+				return cached ?? { ...def, azimuth: null };
+			});
+			return chart;
 		} catch {
 			return SAMPLE_CHART;
 		}
