@@ -6,12 +6,12 @@
 	import { getEphemeris } from '$lib/astro/ephemeris';
 	import { calculateAzimuths } from '$lib/astro/azimuth';
 
-	// Form fields
-	let year = $state($birthDataStore?.year ?? 1990);
-	let month = $state($birthDataStore?.month ?? 1);
-	let day = $state($birthDataStore?.day ?? 1);
-	let hour = $state($birthDataStore?.hour ?? 12);
-	let minute = $state($birthDataStore?.minute ?? 0);
+	// Form fields — use NaN for "empty" so inputs show placeholders
+	let year = $state($birthDataStore?.year ?? NaN);
+	let month = $state($birthDataStore?.month ?? NaN);
+	let day = $state($birthDataStore?.day ?? NaN);
+	let hour = $state($birthDataStore?.hour ?? NaN);
+	let minute = $state($birthDataStore?.minute ?? NaN);
 	let latitude = $state($birthDataStore?.latitude ?? NaN);
 	let longitude = $state($birthDataStore?.longitude ?? NaN);
 	let locationLabel = $state($birthDataStore?.locationLabel ?? '');
@@ -43,14 +43,19 @@
 	);
 
 	let formValid = $derived(
-		year >= 1900 &&
+		!isNaN(year) &&
+			year >= 1900 &&
 			year <= 2100 &&
+			!isNaN(month) &&
 			month >= 1 &&
 			month <= 12 &&
+			!isNaN(day) &&
 			day >= 1 &&
 			day <= 31 &&
+			!isNaN(hour) &&
 			hour >= 0 &&
 			hour <= 23 &&
+			!isNaN(minute) &&
 			minute >= 0 &&
 			minute <= 59 &&
 			!isNaN(latitude) &&
@@ -164,7 +169,8 @@
 					min="1900"
 					max="2100"
 					bind:value={year}
-					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					placeholder="1990"
+					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				/>
 			</label>
 			<label class="w-20">
@@ -173,6 +179,7 @@
 					bind:value={month}
 					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white"
 				>
+					<option value={NaN} disabled selected hidden>MM</option>
 					{#each Array.from({ length: 12 }, (_, i) => i + 1) as m}
 						<option value={m}>{String(m).padStart(2, '0')}</option>
 					{/each}
@@ -185,7 +192,8 @@
 					min="1"
 					max="31"
 					bind:value={day}
-					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					placeholder="1"
+					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				/>
 			</label>
 		</div>
@@ -202,7 +210,8 @@
 					min="0"
 					max="23"
 					bind:value={hour}
-					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					placeholder="12"
+					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				/>
 			</label>
 			<label class="flex-1">
@@ -212,7 +221,8 @@
 					min="0"
 					max="59"
 					bind:value={minute}
-					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					placeholder="0"
+					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				/>
 			</label>
 		</div>

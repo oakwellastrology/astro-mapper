@@ -7,7 +7,7 @@
 	import BirthDataForm from '$lib/components/BirthDataForm.svelte';
 	import { settingsStore } from '$lib/stores/settingsStore';
 
-	let activeTab: 'birthdata' | 'azimuths' | 'location' | 'settings' = $state('azimuths');
+	let activeTab: 'birthdata' | 'azimuths' | 'location' | 'settings' = $state('birthdata');
 
 	onMount(async () => {
 		const { initEphemeris } = await import('$lib/astro/ephemeris');
