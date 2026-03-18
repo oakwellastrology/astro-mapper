@@ -6,6 +6,12 @@
 	import { getEphemeris } from '$lib/astro/ephemeris';
 	import { calculateAzimuths } from '$lib/astro/azimuth';
 
+	interface Props {
+		onCalculated?: () => void;
+	}
+
+	let { onCalculated }: Props = $props();
+
 	// Form fields — use NaN for "empty" so inputs show placeholders
 	let year = $state($birthDataStore?.year ?? NaN);
 	let month = $state($birthDataStore?.month ?? NaN);
@@ -141,6 +147,8 @@
 
 			// Persist birth data
 			setBirthData(data);
+
+			onCalculated?.();
 		} catch (err) {
 			calcError = err instanceof Error ? err.message : 'Calculation failed';
 			console.error('Azimuth calculation error:', err);
