@@ -26,6 +26,11 @@
 		point: '4, 4',
 	};
 
+	function hasLocation(chart: ChartConfig): boolean {
+		const c = chart.centerLocation;
+		return c.label !== '' || c.lat !== 0 || c.lng !== 0;
+	}
+
 	function drawLines(chart: ChartConfig, opacity: number, thicknessMultiplier: number) {
 		if (!map || !leafletModule) return;
 
@@ -37,18 +42,27 @@
 		polylines = [];
 
 		const center = chart.centerLocation;
+		const locationSet = hasLocation(chart);
 
-		// Update or create the draggable center marker
-		if (centerMarker) {
-			centerMarker.setLatLng([center.lat, center.lng]);
+		// Manage the draggable center marker — only show when a location is set
+		if (locationSet) {
+			if (centerMarker) {
+				centerMarker.setLatLng([center.lat, center.lng]);
+			} else {
+				centerMarker = L.marker([center.lat, center.lng], { draggable: true })
+					.addTo(map)
+					.bindTooltip('Drag to relocate center');
+				centerMarker.on('dragend', () => {
+					const pos = centerMarker.getLatLng();
+					setCenter(pos.lat, pos.lng, `${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`);
+				});
+			}
 		} else {
-			centerMarker = L.marker([center.lat, center.lng], { draggable: true })
-				.addTo(map)
-				.bindTooltip('Drag to relocate center');
-			centerMarker.on('dragend', () => {
-				const pos = centerMarker.getLatLng();
-				setCenter(pos.lat, pos.lng, `${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`);
-			});
+			if (centerMarker) {
+				centerMarker.remove();
+				centerMarker = undefined!;
+			}
+			return; // No location — skip drawing lines
 		}
 
 		for (const planet of chart.planets) {
@@ -91,8 +105,14 @@
 		const L = leafletModule;
 
 		const { get } = await import('svelte/store');
-		const initialCenter = get(chartStore).centerLocation;
-		map = L.map(container, { preferCanvas: true }).setView([initialCenter.lat, initialCenter.lng], 6);
+		const initialChart = get(chartStore);
+		const initialHasLocation = hasLocation(initialChart);
+		map = L.map(container, { preferCanvas: true }).setView(
+			initialHasLocation
+				? [initialChart.centerLocation.lat, initialChart.centerLocation.lng]
+				: [20, 0],
+			initialHasLocation ? 6 : 2
+		);
 
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; OpenStreetMap contributors',
@@ -107,8 +127,9 @@
 			currentChart = chart;
 			// Recenter map if center location changed
 			const c = chart.centerLocation;
-			if (lastCenter && (lastCenter.lat !== c.lat || lastCenter.lng !== c.lng)) {
-				map.setView([c.lat, c.lng]);
+			const locationSet = hasLocation(chart);
+			if (locationSet && lastCenter && (lastCenter.lat !== c.lat || lastCenter.lng !== c.lng)) {
+				map.setView([c.lat, c.lng], Math.max(map.getZoom(), 6));
 			}
 			lastCenter = { lat: c.lat, lng: c.lng };
 			if (currentOpacity !== undefined) {
