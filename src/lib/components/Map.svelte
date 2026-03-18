@@ -11,6 +11,7 @@
 	let map: L.Map;
 	let polylines: L.Polyline[] = [];
 	let centerMarker: L.Marker;
+	let draggedCenter = false;
 
 	const BASE_WEIGHTS: Record<PlanetLine['category'], number> = {
 		personal: 3,
@@ -53,6 +54,7 @@
 					.addTo(map)
 					.bindTooltip('Drag to relocate center');
 				centerMarker.on('dragend', () => {
+					draggedCenter = true;
 					const pos = centerMarker.getLatLng();
 					setCenter(pos.lat, pos.lng, `${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`);
 				});
@@ -125,12 +127,17 @@
 
 		const unsubChart = chartStore.subscribe((chart) => {
 			currentChart = chart;
-			// Recenter map if center location changed
+			// Recenter map if center location changed (skip zoom when user dragged the pin)
 			const c = chart.centerLocation;
 			const locationSet = hasLocation(chart);
 			if (locationSet && lastCenter && (lastCenter.lat !== c.lat || lastCenter.lng !== c.lng)) {
-				map.setView([c.lat, c.lng], Math.max(map.getZoom(), 6));
+				if (draggedCenter) {
+					map.panTo([c.lat, c.lng]);
+				} else {
+					map.setView([c.lat, c.lng], Math.max(map.getZoom(), 6));
+				}
 			}
+			draggedCenter = false;
 			lastCenter = { lat: c.lat, lng: c.lng };
 			if (currentOpacity !== undefined) {
 				drawLines(currentChart, currentOpacity, currentThickness);
