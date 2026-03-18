@@ -177,7 +177,7 @@
 					min="1900"
 					max="2100"
 					bind:value={year}
-					placeholder="1990"
+					placeholder="1960"
 					class="w-full rounded bg-white/10 px-2 py-1 text-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				/>
 			</label>
