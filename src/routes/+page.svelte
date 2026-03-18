@@ -83,6 +83,7 @@
 				</div>
 			{/if}
 		</div>
+		<p class="px-4 py-3 text-lg text-gray-500">&copy; Sam Oakwell 2026</p>
 	</aside>
 	<main class="grow">
 		<Map />
