@@ -1,13 +1,13 @@
 import { writable } from 'svelte/store';
 import type { ChartConfig } from '../types';
-import { DEFAULT_PLANETS, SAMPLE_CHART } from '../constants';
+import { DEFAULT_PLANETS, DEFAULT_CHART } from '../constants';
 
 const STORAGE_KEY = 'localspace-chart';
 
 const VALID_IDS = new Set(DEFAULT_PLANETS.map((p) => p.id));
 
 function loadChart(): ChartConfig {
-	if (typeof localStorage === 'undefined') return SAMPLE_CHART;
+	if (typeof localStorage === 'undefined') return DEFAULT_CHART;
 	const saved = localStorage.getItem(STORAGE_KEY);
 	if (saved) {
 		try {
@@ -20,10 +20,10 @@ function loadChart(): ChartConfig {
 			});
 			return chart;
 		} catch {
-			return SAMPLE_CHART;
+			return DEFAULT_CHART;
 		}
 	}
-	return SAMPLE_CHART;
+	return DEFAULT_CHART;
 }
 
 export const chartStore = writable<ChartConfig>(loadChart());

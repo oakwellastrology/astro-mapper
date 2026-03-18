@@ -16,19 +16,13 @@ export const DEFAULT_PLANETS: Omit<PlanetLine, 'azimuth'>[] = [
 	{ id: 'chiron', name: 'Chiron', symbol: '⚷', color: '#666666', lineStyle: 'dashed', visible: true, category: 'point' },
 ];
 
-const SAMPLE_AZIMUTHS: Record<string, number> = {
-	sun: 211, moon: 195, mercury: 215, venus: 239, mars: 200,
-	jupiter: 68, saturn: 301, uranus: 307, neptune: 318, pluto: 266,
-	nnode: 136, vesta: 200, chiron: 157,
-};
-
-export const SAMPLE_CHART: ChartConfig = {
-	id: 'sample',
-	name: 'Sample Chart (Palo Alto)',
-	centerLocation: { lat: 37.4419, lng: -122.143, label: 'Palo Alto, CA' },
+export const DEFAULT_CHART: ChartConfig = {
+	id: 'default',
+	name: '',
+	centerLocation: { lat: 0, lng: 0, label: '' },
 	createdAt: new Date().toISOString(),
 	planets: DEFAULT_PLANETS.map((p) => ({
 		...p,
-		azimuth: SAMPLE_AZIMUTHS[p.id] ?? null,
+		azimuth: null,
 	})),
 };
