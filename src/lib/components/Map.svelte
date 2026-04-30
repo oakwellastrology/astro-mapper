@@ -90,26 +90,34 @@
 			const backward = geodesicPoints(center, (planet.azimuth + 180) % 360, 20_000_000, 100);
 			const fullPath = [...backward.reverse(), ...forward];
 
-			const line = L.polyline(
-				fullPath.map((p) => [p.lat, p.lng] as L.LatLngTuple),
-				{
-					color: planet.color,
-					weight: baseWeight,
-					dashArray,
-					opacity,
-				}
-			).addTo(map);
+			const latLngs = fullPath.map((p) => [p.lat, p.lng] as L.LatLngTuple);
 
-			line.bindTooltip(`${planet.symbol} ${planet.name} — ${planet.azimuth}°`, { sticky: true });
+			const line = L.polyline(latLngs, {
+				color: planet.color,
+				weight: baseWeight,
+				dashArray,
+				opacity,
+				interactive: false,
+			}).addTo(map);
 
-			line.on('mouseover', () => {
+			// Invisible hit area for easier tapping/hovering
+			const hitArea = L.polyline(latLngs, {
+				color: planet.color,
+				weight: 20,
+				opacity: 0,
+			}).addTo(map);
+
+			hitArea.bindTooltip(`${planet.symbol} ${planet.name} — ${planet.azimuth}°`, { sticky: true });
+
+			hitArea.on('mouseover', () => {
 				line.setStyle({ opacity: 1.0, weight: baseWeight + 1 });
 			});
-			line.on('mouseout', () => {
+			hitArea.on('mouseout', () => {
 				line.setStyle({ opacity, weight: baseWeight });
 			});
 
 			polylines.push(line);
+			polylines.push(hitArea);
 		}
 	}
 
