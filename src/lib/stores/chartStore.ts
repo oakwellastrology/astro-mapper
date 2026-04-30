@@ -1,24 +1,27 @@
 import { writable } from 'svelte/store';
-import type { ChartConfig } from '../types';
+import type { ChartConfig, PlanetLine } from '../types';
 import { DEFAULT_PLANETS, DEFAULT_CHART } from '../constants';
 
 const STORAGE_KEY = 'localspace-chart';
 
 const VALID_IDS = new Set(DEFAULT_PLANETS.map((p) => p.id));
 
+type PersistedPlanet = Pick<PlanetLine, 'id' | 'visible'>;
+
 function loadChart(): ChartConfig {
 	if (typeof localStorage === 'undefined') return DEFAULT_CHART;
 	const saved = localStorage.getItem(STORAGE_KEY);
 	if (saved) {
 		try {
-			const chart = JSON.parse(saved) as ChartConfig;
-			// Merge cached data with DEFAULT_PLANETS: preserve cached values, add new planets, remove old ones, maintain DEFAULT_PLANETS order
-			const cachedById = new Map(chart.planets.map((p) => [p.id, p]));
-			chart.planets = DEFAULT_PLANETS.map((def) => {
-				const cached = cachedById.get(def.id);
-				return cached ?? { ...def, azimuth: null };
-			});
-			return chart;
+			const persisted = JSON.parse(saved) as { planets: PersistedPlanet[] };
+			const cachedById = new Map(persisted.planets.map((p) => [p.id, p]));
+			return {
+				...DEFAULT_CHART,
+				planets: DEFAULT_PLANETS.map((def) => {
+					const cached = cachedById.get(def.id);
+					return { ...def, azimuth: null, visible: cached?.visible ?? def.visible };
+				}),
+			};
 		} catch {
 			return DEFAULT_CHART;
 		}
@@ -33,7 +36,10 @@ chartStore.subscribe((value) => {
 	if (typeof localStorage === 'undefined') return;
 	clearTimeout(debounceTimer);
 	debounceTimer = setTimeout(() => {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+		const persisted: { planets: PersistedPlanet[] } = {
+			planets: value.planets.map(({ id, visible }) => ({ id, visible })),
+		};
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
 	}, 300);
 });
 
