@@ -25,7 +25,7 @@
 	});
 </script>
 
-<div class="flex h-screen w-screen flex-col lg:flex-row">
+<div class="flex h-screen w-screen flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
 	<aside bind:this={controlsSection} class="flex w-full shrink-0 flex-col bg-[#1a1a2e] text-white lg:h-screen lg:w-96 lg:overflow-y-auto">
 		<h1 class="px-4 pt-4 text-lg font-semibold">Local Space Map</h1>
 

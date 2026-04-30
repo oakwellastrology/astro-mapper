@@ -12,6 +12,7 @@
 	let polylines: L.Polyline[] = [];
 	let centerMarker: L.Marker;
 	let draggedCenter = false;
+	let drawRaf: number | null = null;
 
 	const BASE_WEIGHTS: Record<PlanetLine['category'], number> = {
 		personal: 3,
@@ -30,6 +31,14 @@
 	function hasLocation(chart: ChartConfig): boolean {
 		const c = chart.centerLocation;
 		return c.label !== '' || c.lat !== 0 || c.lng !== 0;
+	}
+
+	function scheduleDrawLines(chart: ChartConfig, opacity: number, thicknessMultiplier: number) {
+		if (drawRaf !== null) cancelAnimationFrame(drawRaf);
+		drawRaf = requestAnimationFrame(() => {
+			drawRaf = null;
+			drawLines(chart, opacity, thicknessMultiplier);
+		});
 	}
 
 	function drawLines(chart: ChartConfig, opacity: number, thicknessMultiplier: number) {
@@ -53,7 +62,11 @@
 				centerMarker = L.marker([center.lat, center.lng], { draggable: true })
 					.addTo(map)
 					.bindTooltip('Drag to relocate center');
+				centerMarker.on('dragstart', () => {
+					map.dragging.disable();
+				});
 				centerMarker.on('dragend', () => {
+					map.dragging.enable();
 					draggedCenter = true;
 					const pos = centerMarker.getLatLng();
 					setCenter(pos.lat, pos.lng, `${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`);
@@ -155,7 +168,7 @@
 			draggedCenter = false;
 			lastCenter = { lat: c.lat, lng: c.lng };
 			if (currentOpacity !== undefined) {
-				drawLines(currentChart, currentOpacity, currentThickness);
+				scheduleDrawLines(currentChart, currentOpacity, currentThickness);
 			}
 		});
 
@@ -163,7 +176,7 @@
 			currentOpacity = settings.opacity;
 			currentThickness = settings.thicknessMultiplier;
 			if (currentChart) {
-				drawLines(currentChart, currentOpacity, currentThickness);
+				scheduleDrawLines(currentChart, currentOpacity, currentThickness);
 			}
 		});
 
